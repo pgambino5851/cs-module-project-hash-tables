@@ -24,11 +24,12 @@ class HashTable:
 
     def __init__(self, capacity=MIN_CAPACITY):
         # Your code here
-        self.capacity = [None] * capacity
+        self.capacity = capacity
+        self.table = [None] * self.capacity
 
 
     def get_num_slots(self):
-        return self.capacity
+        return len(self.table)
         """
         Return the length of the list you're using to hold the hash
         table data. (Not the number of items stored in the hash table,
@@ -43,10 +44,10 @@ class HashTable:
 
     def get_load_factor(self):
         count = 0
-        for i in self.capacity:
+        for i in self.table:
             if i is not None:
                 count += 1
-        return count / self.capacity
+        return count / len(self.table)
         """
         Return the load factor for this hash table.
 
@@ -88,12 +89,23 @@ class HashTable:
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        return self.fnv1(key) % len(self.capacity)
+        return self.fnv1(key) % len(self.table)
         # return self.djb2(key) % self.capacity
 
     def put(self, key, value):
         slot = self.hash_index(key)
-        self.capacity[slot] = HashTableEntry(key, value)
+        entry = self.table[slot]
+        if entry is None:
+            self.table[slot] = HashTableEntry(key, value)
+        else:
+            while entry and entry.key is not key:
+                prev, entry = entry, entry.next
+            if entry: 
+                entry.value = value
+            else: 
+                prev.next = HashTableEntry(key, value)
+        if self.get_load_factor() > 0.7:
+            self.resize(2)
         """
         Store the value with the given key.
 
@@ -117,13 +129,13 @@ class HashTable:
 
 
     def get(self, key):
-        slot = self.hash_index(key)
-        hashEntry = self.capacity[slot]
-
-        if hashEntry is not None:
-            return hashEntry.value
-        
-        return None
+        hash = self.hash_index(key)
+        if not self.table[hash]: 
+            return None
+        else:
+            entry = self.table[hash]
+            while entry and entry.key != key: entry = entry.next
+            return entry.value
         """
         Retrieve the value stored with the given key.
 
@@ -141,7 +153,7 @@ class HashTable:
 
         Implement this.
         """
-        self.capacity = new_capacity
+        self.table = self.table * new_capacity
 
 
 

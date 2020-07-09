@@ -1,6 +1,28 @@
+
+import string
+import re
+
 def word_count(s):
     # Your code here
+    cache = {}
+    s = s.lower()
+    transMap = (str.maketrans('', '', '[:;,."-+=/\\|[]{}()*^&]'))
+    s = s.translate(transMap)
 
+    
+
+    print(s)
+    strings = s.split()
+    for i in range(0, len(strings)):
+        
+        if strings[i] not in cache and strings[i] is not None:
+            
+            cache[strings[i]] = 1
+        else:
+            cache[strings[i]] = cache[strings[i]] + 1
+
+    return cache
+#
 
 
 if __name__ == "__main__":
